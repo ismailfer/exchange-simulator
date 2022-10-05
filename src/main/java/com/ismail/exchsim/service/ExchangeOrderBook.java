@@ -117,6 +117,7 @@ public class ExchangeOrderBook
         }
         catch (IllegalArgumentException ie)
         {
+            
             order.active = false;
             order.status = OrderStatus.Rejected;
             order.notes = ie.getMessage();
@@ -128,6 +129,8 @@ public class ExchangeOrderBook
             resp.errorMessage = order.notes;
 
             exchSimService.onOrderEvent(resp);
+            
+            return;
         }
         catch (Exception e)
         {
@@ -142,6 +145,8 @@ public class ExchangeOrderBook
             resp.errorMessage = order.notes;
 
             exchSimService.onOrderEvent(resp);
+            
+            return;
         }
 
         lock.lock();
