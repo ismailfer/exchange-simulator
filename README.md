@@ -10,10 +10,10 @@ Note: This is a work in progress
 
 [github.com/ismailfer/exchange-simulator](https://github.com/ismailfer/exchange-simulator)
 
-#### Objectives
+### Objectives
 - Used for testing purposes of algorithmic trading systems
 
-#### Main features:
+## Main features:
 - Rest API for order placement, status request, market data requests
 - Native websockets API using Jetty Server
 - Orders are placed via a websocket connection
@@ -25,7 +25,7 @@ Note: This is a work in progress
 - Order book can be cleared via a command in RestAPI or websocket
 
 
-#### Architecture
+## Architecture
 - Spring Boot framework for the execution client webpage
 - Rest API
 - Native WebSockets, using Jetty Server embedded in the spring boot app
@@ -36,14 +36,14 @@ Note: This is a work in progress
 - Zero Garbage Collection environment
 - Java 17. However the code base can also run in Java 11 and above
 
-#### RestAPI and Websockets API - Postman Collections
+## RestAPI and Websockets API - Postman Collections
 
 Test cases of RestAPIs and Websocket APIs are found in the following Postman collection
 
 [Postman - Exchange Simulator Workspace](https://www.postman.com/restless-satellite-277762/workspace/exchange-simulator-workspace)
 
 
-#### Java 17
+#### Running the Application
 
 To run the application from the war file:
 
