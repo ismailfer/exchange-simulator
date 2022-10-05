@@ -8,13 +8,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.ismail.exchsim.model.OrderBookEntryEvent;
-import com.ismail.exchsim.model.OrderBookEvent;
-import com.ismail.exchsim.model.TopOfBookEvent;
 import com.ismail.exchsim.model.CancelResponse;
 import com.ismail.exchsim.model.NewOrderResponse;
+import com.ismail.exchsim.model.OrderBookEntryEvent;
+import com.ismail.exchsim.model.OrderBookEvent;
 import com.ismail.exchsim.model.OrderState;
 import com.ismail.exchsim.model.OrderType;
+import com.ismail.exchsim.model.TopOfBookEvent;
 import com.ismail.exchsim.model.TradeEvent;
 
 import lombok.extern.slf4j.Slf4j;
@@ -264,6 +264,7 @@ public class ExchangeOrderBook
             }
 
             // update order status
+            order.active = false;
             if (order.filledQuantity == 0.0)
                 order.status = OrderState.Canceled;
             else if (order.getRemainingQuantity() > 0.0)

@@ -1,7 +1,6 @@
 package com.ismail.exchsim.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,17 +10,14 @@ import org.springframework.stereotype.Service;
 
 import com.ismail.exchsim.JettyServer;
 import com.ismail.exchsim.config.ExchangeSimulatorConfig;
-import com.ismail.exchsim.controller.OrderBookWebsocket;
-import com.ismail.exchsim.controller.OrderWebsocket;
-import com.ismail.exchsim.controller.TopOfBookWebsocket;
-import com.ismail.exchsim.model.OrderBookEvent;
-import com.ismail.exchsim.model.TopOfBookEvent;
 import com.ismail.exchsim.model.CancelRequest;
 import com.ismail.exchsim.model.CancelResponse;
 import com.ismail.exchsim.model.NewOrderRequest;
 import com.ismail.exchsim.model.NewOrderResponse;
+import com.ismail.exchsim.model.OrderBookEvent;
 import com.ismail.exchsim.model.OrderState;
 import com.ismail.exchsim.model.OrderStatusResponse;
+import com.ismail.exchsim.model.TopOfBookEvent;
 import com.ismail.exchsim.model.TradeEvent;
 import com.ismail.exchsim.util.StringUtil;
 

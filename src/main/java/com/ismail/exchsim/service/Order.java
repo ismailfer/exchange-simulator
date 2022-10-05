@@ -1,7 +1,6 @@
 package com.ismail.exchsim.service;
 
 import com.ismail.exchsim.model.OrderState;
-import com.ismail.exchsim.model.OrderType;
 
 import lombok.ToString;
 

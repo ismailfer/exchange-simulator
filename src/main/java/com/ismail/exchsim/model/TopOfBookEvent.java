@@ -3,7 +3,7 @@ package com.ismail.exchsim.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import lombok.Data;
+
 import lombok.ToString;
 
 /**
@@ -12,7 +12,6 @@ import lombok.ToString;
  * @author ismail
  * @since 20221001
  */
-@Data
 @ToString
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)

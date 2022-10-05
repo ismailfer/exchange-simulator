@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import lombok.Data;
 import lombok.ToString;
 
 /**
@@ -14,7 +13,6 @@ import lombok.ToString;
  * @author ismail
  * @since 20221001
  */
-@Data
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderBookEvent extends ResponseMessage

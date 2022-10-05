@@ -60,6 +60,10 @@ public class OrderBook
                     bids.add(entry);
 
             }
+            else
+            {
+                bids = null;
+            }
         }
 
         {
@@ -90,6 +94,10 @@ public class OrderBook
                 asks = new ArrayList<>(asksArr.length);
                 for (OrderBookEntry entry : asksArr)
                     asks.add(entry);
+            }
+            else
+            {
+                asks = null;
             }
         }
 

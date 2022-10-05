@@ -5,14 +5,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.ismail.exchsim.service.Order;
 
-import lombok.Data;
 import lombok.ToString;
 
 /**
  * @author ismail
  * @since 20221001
  */
-@Data
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
