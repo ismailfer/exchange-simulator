@@ -36,7 +36,12 @@ Note: This is a work in progress
 - Zero Garbage Collection environment
 - Java 17. However the code base can also run in Java 11 and above
 
-#### API Postman Collection
+#### RestAPI and Websockets API - Postman Collections
+
+Test cases of RestAPIs and Websocket APIs are found in the following Postman collection
+
+[Postman - Exchange Simulator Workspace](https://www.postman.com/restless-satellite-277762/workspace/exchange-simulator-workspace)
+
 
 #### Java 17
 
