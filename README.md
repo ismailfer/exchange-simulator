@@ -8,6 +8,8 @@ Market data is also fed via websockets
 
 Note: This is a work in progress
 
+[github.com/ismailfer/exchange-simulator](https://github.com/ismailfer/exchange-simulator)
+
 #### Objectives
 - Used for testing purposes of algorithmic trading systems
 
@@ -32,8 +34,23 @@ Note: This is a work in progress
 - Reactive programming architecture
 - Concurrent / Multi-threading environment
 - Zero Garbage Collection environment
+- Java 17. However the code base can also run in Java 11 and above
 
 #### API Postman Collection
+
+#### Java 17
+
+To run the application from the war file:
+
+```text
+java -jar target\exchange-simulator-springboot-1.0.war
+```
+
+To run the application with ZeroG garbage collector
+
+```text
+java -XX:+UseZGC -Xmx2g -jar target\exchange-simulator-springboot-1.0.war
+```
 
 ## Deployments
 - Docker
@@ -45,7 +62,7 @@ This application is dockerized with Dockerfile
 
 Latest docker image is available at my dockerhub; built with jdk17, running on port 9080
 
-[hub.docker.com/r/ismailfer/exchange-siulator](https://hub.docker.com/r/ismailfer/exchange-siulator)
+[hub.docker.com/r/ismailfer/exchange-simulator](https://hub.docker.com/r/ismailfer/exchange-simulator)
 
 
 To build a docker image:
