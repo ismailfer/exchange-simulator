@@ -1,6 +1,6 @@
 package com.ismail.exchsim.service;
 
-import com.ismail.exchsim.model.OrderStatus;
+import com.ismail.exchsim.model.OrderState;
 import com.ismail.exchsim.model.OrderType;
 
 import lombok.ToString;
@@ -73,7 +73,7 @@ public class Order
         
         this.orderType = "Limit";
         this.active = true;
-        this.status = OrderStatus.PendingNew;
+        this.status = OrderState.PendingNew;
         
         side = (quantity >= 0);            
     }
@@ -89,7 +89,7 @@ public class Order
         this.stopPrice = stopPrice;
         
         this.active = true;
-        this.status = OrderStatus.PendingNew;
+        this.status = OrderState.PendingNew;
 
         side = (quantity >= 0);            
     }

@@ -22,15 +22,18 @@ public class MessageType
 
     public static final String Subscription = "Subscription";
 
-    public static final String NewOrderRequest = "Order";
+    public static final String NewOrderRequest = "NewOrderRequest";
 
-    public static final String OrderEvent = "OrderAck";
+    public static final String NewOrderResponse = "NewOrderResponse";
 
-    public static final String OrderReject = "OrderReject";
+    public static final String CancelRequest = "CancelRequest";
 
-    public static final String CancelAccept = "CanelAccept";
+    public static final String CancelResponse = "CancelResponse";
 
-    public static final String CancelReject = "CancelReject";
+    public static final String OrderStatusRequest = "OrderStatusRequest";
+
+    public static final String OrderStatusResponse = "OrderStatusResponse";
+
 
     public static final String Order = "Order";
     

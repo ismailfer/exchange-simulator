@@ -18,7 +18,7 @@ public class ExchangeSimulatorTest
     public void test1()
     {
 
-        Exchange exch = new Exchange(null, "FX");
+        Exchange exch = new Exchange(null);
 
         exch.addOrder(new Order("A", "FX", "AUDUSD", 100, 1.47));
         exch.addOrder(new Order("B", "FX", "AUDUSD", -50, 1.45));
@@ -37,7 +37,7 @@ public class ExchangeSimulatorTest
     @Test
     public void test2()
     {
-        Exchange exch = new Exchange(null, "FX");
+        Exchange exch = new Exchange(null);
 
         exch.addOrder(new Order("A", "FX", "GBPUSD", 100, 1.66));
         exch.addOrder(new Order("B", "FX", "EURUSD", -100, 1.11));

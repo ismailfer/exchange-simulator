@@ -22,11 +22,8 @@ import com.ismail.exchsim.model.OrderType;
  */
 public class Exchange
 {
-
     private ExchangeSimulatorService exchSimService = null;
     
-    private String exchangeID;
-
     /**
      * Lock used to maintain concurrency on the order book cache
      */
@@ -34,7 +31,13 @@ public class Exchange
 
     private ArrayList<ExchangeOrderBook> orderBookList = new ArrayList<>();
 
-    private HashMap<String, ExchangeOrderBook> orderBookByInstrumentId = new HashMap<>();
+    private HashMap<String, ExchangeOrderBook> orderBookByInstrumentID = new HashMap<>();
+
+    private ArrayList<Order> orderList = new ArrayList<>();
+
+    private HashMap<Integer, Order> orderByOrderID = new HashMap<>();
+
+    private HashMap<String, Order> orderByClientOrderID = new HashMap<>();
 
     /**
      * Lock used to maintain concurrency on the orderId generator
@@ -51,17 +54,11 @@ public class Exchange
     private int tradeIdGenerator = 0;
 
 
-    public Exchange(ExchangeSimulatorService exchSimService, String exchangeID)
+    public Exchange(ExchangeSimulatorService exchSimService)
     {
         this.exchSimService = exchSimService;
-        this.exchangeID = exchangeID;
     }
     
-    public String getExchangeID()
-    {
-        return exchangeID;
-    }
-
     private int nextOrderId()
     {
         orderIdLock.lock();
@@ -98,18 +95,20 @@ public class Exchange
      * @param instrumentId
      * @return
      */
-    public ExchangeOrderBook getOrCreateOrderBookByInstrument(String instrumentId)
+    public ExchangeOrderBook getOrCreateOrderBookByInstrument(String instrumentID, String exchangeID)
     {
         ExchangeOrderBook orderBook = null;
 
+        String key = instrumentID + "." + exchangeID;
+        
         cacheLock.lock();
         try
         {
-            orderBook = orderBookByInstrumentId.get(instrumentId);
+            orderBook = orderBookByInstrumentID.get(key);
             if (orderBook == null)
             {
-                orderBook = new ExchangeOrderBook(exchSimService, this, instrumentId);
-                orderBookByInstrumentId.put(instrumentId, orderBook);
+                orderBook = new ExchangeOrderBook(exchSimService, this, instrumentID, exchangeID);
+                orderBookByInstrumentID.put(key, orderBook);
                 orderBookList.add(orderBook);
             }
 
@@ -130,13 +129,14 @@ public class Exchange
      * @param instrumentId
      * @return
      */
-    public ExchangeOrderBook getOrderBookByInstrument(String instrumentId)
+    public ExchangeOrderBook getOrderBookByInstrument(String instrumentID, String exchangeID)
     {
-
+        String key = instrumentID + "." + exchangeID;
+        
         cacheLock.lock();
         try
         {
-            return orderBookByInstrumentId.get(instrumentId);
+            return orderBookByInstrumentID.get(key);
         }
         finally
         {
@@ -165,6 +165,10 @@ public class Exchange
             throw new IllegalArgumentException("clientId is required!");
 
         // input validation: instrument
+        if (order.exchangeID == null || order.exchangeID.trim().length() == 0)
+            throw new IllegalArgumentException("exchangeID is required!");
+
+        // input validation: instrument
         if (order.instrumentID == null || order.instrumentID.trim().length() == 0)
             throw new IllegalArgumentException("instrumentId is required!");
 
@@ -181,15 +185,75 @@ public class Exchange
             throw new IllegalArgumentException("invalid quantity");
 
         // assign an order id            
-        order.orderID = nextOrderId();
         order.time = System.currentTimeMillis();
         order.updateTime = order.time;
 
+        // add order to the cache
+        orderIdLock.lock();
+        try
+        {
+            order.orderID = nextOrderId();
+            orderByOrderID.put(order.orderID, order);
+            orderList.add(order);
+        }
+        finally
+        {
+            orderIdLock.unlock();
+        }
+        
         // lookup the OrderBook
-        ExchangeOrderBook orderBook = getOrCreateOrderBookByInstrument(order.instrumentID);
+        ExchangeOrderBook orderBook = getOrCreateOrderBookByInstrument(order.instrumentID,  order.exchangeID);
 
         // add the order to orderBook
         orderBook.addOrder(order);
+    }
+    
+    public void cancelOrder(Order order)
+    {
+        if (order.active == false)
+            throw new IllegalArgumentException("Order is not active");
+
+        // assign an order id            
+        order.time = System.currentTimeMillis();
+        order.updateTime = order.time;
+
+       
+        // lookup the OrderBook
+        ExchangeOrderBook orderBook = getOrderBookByInstrument(order.instrumentID,  order.exchangeID);
+
+        // add the order to orderBook
+        if (orderBook != null)
+            orderBook.cancelOrder(order);
+    }
+    
+    public Order getOrderByID(int orderID)
+    {
+        // add order to the cache
+        orderIdLock.lock();
+        try
+        {
+            return orderByOrderID.get(orderID);
+        }
+        finally
+        {
+            orderIdLock.unlock();
+        }
+    }
+    
+    public Order getOrderByClientOrderID(String clientID, String clientOrderID)
+    {
+        String key = clientID + "." + clientOrderID;
+        
+        // add order to the cache
+        orderIdLock.lock();
+        try
+        {
+            return orderByClientOrderID.get(key);
+        }
+        finally
+        {
+            orderIdLock.unlock();
+        }
     }
     
     public ArrayList<Trade> getAllTrades()
@@ -225,9 +289,9 @@ public class Exchange
         return orderList;
     }
     
-    public ArrayList<Order> getActiveOrdersByInstrumentId(String instrumentId)
+    public ArrayList<Order> getActiveOrdersByInstrumentId(String instrumentId, String exchangeId)
     {
-        ExchangeOrderBook orderBook = getOrderBookByInstrument(instrumentId);
+        ExchangeOrderBook orderBook = getOrderBookByInstrument(instrumentId, exchangeId);
         
         ArrayList<Order> orderList = orderBook.getActiveOrders();
 

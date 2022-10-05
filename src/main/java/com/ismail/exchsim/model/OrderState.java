@@ -4,7 +4,7 @@ package com.ismail.exchsim.model;
  * @author ismail
  * @since 20221001
  */
-public class OrderStatus
+public class OrderState
 {
     public static final String PendingNew = "PendingNew";
 

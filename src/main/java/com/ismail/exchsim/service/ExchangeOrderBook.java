@@ -11,8 +11,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.ismail.exchsim.model.OrderBookEntryEvent;
 import com.ismail.exchsim.model.OrderBookEvent;
 import com.ismail.exchsim.model.TopOfBookEvent;
-import com.ismail.exchsim.model.OrderEvent;
-import com.ismail.exchsim.model.OrderStatus;
+import com.ismail.exchsim.model.CancelResponse;
+import com.ismail.exchsim.model.NewOrderResponse;
+import com.ismail.exchsim.model.OrderState;
 import com.ismail.exchsim.model.OrderType;
 import com.ismail.exchsim.model.TradeEvent;
 
@@ -74,14 +75,24 @@ public class ExchangeOrderBook
     // snapshot of latest top of book event
     private TopOfBookEvent mdTopOfBookEv = null;
 
-    public ExchangeOrderBook(ExchangeSimulatorService exchSimService, Exchange exchange, String instrumentId)
+    public ExchangeOrderBook(ExchangeSimulatorService exchSimService, Exchange exchange, String instrumentId, String exchangeID)
     {
         this.exchSimService = exchSimService;
         this.exchange = exchange;
         this.instrumentID = instrumentId;
-        this.exchangeID = exchange.getExchangeID();
+        this.exchangeID = exchangeID;
 
         executor = Executors.newSingleThreadExecutor();
+    }
+
+    public String getExchangeID()
+    {
+        return exchangeID;
+    }
+
+    public String getInstrumentID()
+    {
+        return instrumentID;
     }
 
     /**
@@ -117,35 +128,35 @@ public class ExchangeOrderBook
         }
         catch (IllegalArgumentException ie)
         {
-            
+
             order.active = false;
-            order.status = OrderStatus.Rejected;
+            order.status = OrderState.Rejected;
             order.notes = ie.getMessage();
             order.updateTime = System.currentTimeMillis();
 
-            OrderEvent resp = new OrderEvent(order);
+            NewOrderResponse resp = new NewOrderResponse(order);
 
             resp.success = false;
             resp.errorMessage = order.notes;
 
             exchSimService.onOrderEvent(resp);
-            
+
             return;
         }
         catch (Exception e)
         {
             order.active = false;
-            order.status = OrderStatus.Rejected;
+            order.status = OrderState.Rejected;
             order.notes = "Error processing request";
             order.updateTime = System.currentTimeMillis();
 
-            OrderEvent resp = new OrderEvent(order);
+            NewOrderResponse resp = new NewOrderResponse(order);
 
             resp.success = false;
             resp.errorMessage = order.notes;
 
             exchSimService.onOrderEvent(resp);
-            
+
             return;
         }
 
@@ -173,16 +184,99 @@ public class ExchangeOrderBook
                     Collections.sort(sellOrderList, new OrderComparatorByPriceAndTime(true));
             }
 
-            // Ack the order
-            order.status = OrderStatus.New;
+            // update order status
+            order.status = OrderState.New;
             order.updateTime = System.currentTimeMillis();
 
-            OrderEvent resp = new OrderEvent(order);
-
+            // ack the order
+            NewOrderResponse resp = new NewOrderResponse(order);
             exchSimService.onOrderEvent(resp);
 
             // process the order
             processOrder(order);
+
+            // update MD book and top of book
+            updateTopOfBookAndOrderBookEvent();
+
+        }
+        finally
+        {
+            lock.unlock();
+        }
+    }
+    
+    
+
+    public void cancelOrder(Order order)
+    {
+        executor.execute(() -> cancelOrder_(order));
+    }
+
+    private void cancelOrder_(Order order)
+    {
+        log.info("cancelOrder() " + instrumentID + ": " + order);
+
+        try
+        {
+            // Validate the order type
+            if (order.active == false)
+                throw new IllegalArgumentException("Order is not active");
+
+            if (order.getRemainingQuantity() <= 0.0)
+                throw new IllegalArgumentException("Too late to cancel");
+
+        }
+        catch (IllegalArgumentException ie)
+        {
+            CancelResponse resp = new CancelResponse(order);
+
+            resp.success = false;
+            resp.errorMessage = ie.getMessage();
+
+            exchSimService.onCancelEvent(resp);
+
+            return;
+        }
+        catch (Exception e)
+        {
+            CancelResponse resp = new CancelResponse(order);
+
+            resp.success = false;
+            resp.errorMessage = "Error processing cancel request";
+
+            exchSimService.onCancelEvent(resp);
+
+            return;
+        }
+
+        lock.lock();
+        try
+        {
+            ordersMapByOrderId.remove(order.orderID);
+
+            if (order.side)
+            {
+                buyOrderList.remove(order);
+            }
+            else
+            {
+                sellOrderList.remove(order);
+            }
+
+            // update order status
+            if (order.filledQuantity == 0.0)
+                order.status = OrderState.Canceled;
+            else if (order.getRemainingQuantity() > 0.0)
+                order.status = OrderState.PartiallyFilled;
+            else
+                order.status = OrderState.Filled;
+            
+            order.updateTime = System.currentTimeMillis();
+
+            // ack the cancel
+            CancelResponse resp = new CancelResponse(order);
+            resp.success = true;
+            exchSimService.onCancelEvent(resp);
 
             // update MD book and top of book
             updateTopOfBookAndOrderBookEvent();
@@ -514,16 +608,16 @@ public class ExchangeOrderBook
             // expire the order
             if (order.filledQuantity > 0.0)
             {
-                order.status = OrderStatus.PartiallyFilled;
+                order.status = OrderState.PartiallyFilled;
             }
             else
             {
-                order.status = OrderStatus.Expired;
+                order.status = OrderState.Expired;
             }
             order.active = false;
             order.updateTime = System.currentTimeMillis();
 
-            OrderEvent resp = new OrderEvent(order);
+            NewOrderResponse resp = new NewOrderResponse(order);
 
             exchSimService.onOrderEvent(resp);
         }
@@ -533,7 +627,7 @@ public class ExchangeOrderBook
     private void processTrade(Trade trade, Order buyOrder, Order sellOrder)
     {
         log.info("processTrade() " + instrumentID + ": " + trade);
-        
+
         lock.lock();
         try
         {
@@ -549,16 +643,15 @@ public class ExchangeOrderBook
             // update buyOrder state
             if (buyOrder.getRemainingQuantity() > 0.0)
             {
-                buyOrder.status = OrderStatus.PartiallyFilled;
+                buyOrder.status = OrderState.PartiallyFilled;
             }
             else
             {
-                buyOrder.status = OrderStatus.Filled;
+                buyOrder.status = OrderState.Filled;
                 sellOrder.active = false;
             }
             buyOrder.updateTime = trade.time;
-            
-            
+
             // send trade events
 
             TradeEvent resp = new TradeEvent(buyOrder, trade);
@@ -571,15 +664,15 @@ public class ExchangeOrderBook
             // update sell Order state
             if (sellOrder.getRemainingQuantity() > 0.0)
             {
-                sellOrder.status = OrderStatus.PartiallyFilled;
+                sellOrder.status = OrderState.PartiallyFilled;
             }
             else
             {
-                sellOrder.status = OrderStatus.Filled;
+                sellOrder.status = OrderState.Filled;
                 sellOrder.active = false;
             }
             sellOrder.updateTime = trade.time;
-            
+
             // send trade events
 
             TradeEvent resp = new TradeEvent(sellOrder, trade);

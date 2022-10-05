@@ -16,9 +16,12 @@ import com.ismail.exchsim.controller.OrderWebsocket;
 import com.ismail.exchsim.controller.TopOfBookWebsocket;
 import com.ismail.exchsim.model.OrderBookEvent;
 import com.ismail.exchsim.model.TopOfBookEvent;
+import com.ismail.exchsim.model.CancelRequest;
+import com.ismail.exchsim.model.CancelResponse;
 import com.ismail.exchsim.model.NewOrderRequest;
-import com.ismail.exchsim.model.OrderEvent;
-import com.ismail.exchsim.model.OrderStatus;
+import com.ismail.exchsim.model.NewOrderResponse;
+import com.ismail.exchsim.model.OrderState;
+import com.ismail.exchsim.model.OrderStatusResponse;
 import com.ismail.exchsim.model.TradeEvent;
 import com.ismail.exchsim.util.StringUtil;
 
@@ -39,9 +42,11 @@ public class ExchangeSimulatorService
      */
     //private Lock cacheLock = new ReentrantLock();
 
-    private ArrayList<Exchange> exchangeList = new ArrayList<>();
+    private Exchange exchange = new Exchange(this);
 
-    private HashMap<String, Exchange> exchangeMap = new HashMap<>();
+    // private ArrayList<Exchange> exchangeList = new ArrayList<>();
+
+    //private HashMap<String, Exchange> exchangeMap = new HashMap<>();
 
     /**
      * Lock used to maintain concurrency on the order book cache
@@ -87,67 +92,30 @@ public class ExchangeSimulatorService
         }
     }
 
-    /**
-     * lookup the Exchange by ID
-     * 
-     * If none exists; it will create one
-     * 
-     * @param instrumentID
-     * @return
-     */
-    public Exchange getExchangeByID(String exchangeId)
+    public void processNewOrder(NewOrderRequest request)
     {
-        Exchange exchange = null;
-
-        exchange = exchangeMap.get(exchangeId);
-
-        return exchange;
+        executor.execute(() -> processNewOrder_(request));
     }
 
-    /**
-     * lookup the Exchange by ID
-     * 
-     * If none exists; it will create one
-     * 
-     * @param instrumentID
-     * @return
-     */
-    public Exchange getOrCreateExchangeByID(String exchangeId)
-    {
-        Exchange exchange = null;
-
-        exchange = exchangeMap.get(exchangeId);
-        if (exchange == null)
-        {
-            exchange = new Exchange(this, exchangeId);
-            exchangeMap.put(exchangeId, exchange);
-            exchangeList.add(exchange);
-        }
-
-        return exchange;
-    }
-
-    public void submitNewOrder(NewOrderRequest request)
-    {
-        executor.execute(() -> submitNewOrder_(request));
-    }
-
-    private void submitNewOrder_(NewOrderRequest request)
+    private void processNewOrder_(NewOrderRequest request)
     {
         try
         {
             // input validation: clientId
+            if (StringUtil.isDefined(request.clientID) == false)
+                throw new IllegalArgumentException("ClientID is required!");
+
+            // input validation: clientId
             if (StringUtil.isDefined(request.exchangeID) == false)
                 throw new IllegalArgumentException("exchangeID is required!");
 
-            Exchange exchange = getOrCreateExchangeByID(request.exchangeID);
-
-            if (exchange == null)
-                throw new IllegalArgumentException("Invalid Exchange: " + request.exchangeID);
+            // input validation: instrumentID
+            if (StringUtil.isDefined(request.instrumentID) == false)
+                throw new IllegalArgumentException("InstrumentID is required!");
 
             Order order = new Order();
             order.active = true;
-            order.status = OrderStatus.PendingNew;
+            order.status = OrderState.PendingNew;
             order.time = System.currentTimeMillis();
             order.updateTime = order.time;
             order.clientID = request.clientID;
@@ -165,34 +133,83 @@ public class ExchangeSimulatorService
         }
         catch (IllegalArgumentException ie)
         {
-            OrderEvent resp = new OrderEvent();
-            resp.clientID = request.clientID;
-            resp.clientOrderID = request.clientOrderID;
-            resp.active = false;
-            resp.status = OrderStatus.Rejected;
-            resp.notes = ie.getMessage();
-            
+            NewOrderResponse resp = new NewOrderResponse(request);
+
             resp.success = false;
-            resp.errorMessage = resp.notes;
+            resp.errorMessage = ie.getMessage();
 
             onOrderEvent(resp);
         }
         catch (Exception e)
         {
-            OrderEvent resp = new OrderEvent();
-            resp.clientID = request.clientID;
-            resp.clientOrderID = request.clientOrderID;
-            resp.active = false;
-            resp.status = OrderStatus.Rejected;
-            resp.notes = e.getMessage();
-            
+            NewOrderResponse resp = new NewOrderResponse(request);
+
             resp.success = false;
-            resp.errorMessage = resp.notes;
+            resp.errorMessage = "Error processing request";
             onOrderEvent(resp);
         }
     }
 
-    public void onOrderEvent(OrderEvent msg)
+    public void processCancelRequest(CancelRequest request)
+    {
+        executor.execute(() -> processCancelRequest_(request));
+    }
+
+    private void processCancelRequest_(CancelRequest request)
+    {
+        try
+        {
+            // input validation: clientId
+            if (StringUtil.isDefined(request.clientID) == false)
+                throw new IllegalArgumentException("ClientID is required!");
+
+            // input validation: clientOrderID or OrderID
+            if ((request.orderID > 0 || StringUtil.isDefined(request.clientOrderID)) == false)
+                throw new IllegalArgumentException("Either OrderID or ClientID is required!");
+
+            // lookup the order by OrderID
+            Order order = null;
+
+            if (request.orderID > 0)
+            {
+                order = exchange.getOrderByID(request.orderID);
+
+                if (order == null)
+                    throw new IllegalArgumentException("Invalid OrderID");
+            }
+            else
+            {
+                order = exchange.getOrderByClientOrderID(request.clientID, request.clientOrderID);
+
+                if (order == null)
+                    throw new IllegalArgumentException("Invalid ClientID/ClientOrderID");
+
+            }
+
+            exchange.cancelOrder(order);
+
+        }
+        catch (IllegalArgumentException ie)
+        {
+            CancelResponse resp = new CancelResponse();
+
+            resp.success = false;
+            resp.errorMessage = ie.getMessage();
+
+            onCancelEvent(resp);
+        }
+        catch (Exception e)
+        {
+            CancelResponse resp = new CancelResponse();
+
+            resp.success = false;
+            resp.errorMessage = "Error processing cancel request";
+
+            onCancelEvent(resp);
+        }
+    }
+
+    public void onOrderEvent(NewOrderResponse msg)
     {
         executor.execute(() -> {
             for (ExchangeEventSubscriber subscriber : orderEventSubscriberList)
@@ -200,7 +217,39 @@ public class ExchangeSimulatorService
                 String clientID = subscriber.getClientID();
 
                 if (StringUtil.isDefined(clientID) == false //
-                        || clientID.equals(msg.clientID))
+                        || clientID.equals(msg.orderDetail.clientID))
+                {
+                    subscriber.processMessage(msg);
+                }
+            }
+        });
+    }
+
+    public void onOrderStatusEvent(OrderStatusResponse msg)
+    {
+        executor.execute(() -> {
+            for (ExchangeEventSubscriber subscriber : orderEventSubscriberList)
+            {
+                String clientID = subscriber.getClientID();
+
+                if (StringUtil.isDefined(clientID) == false //
+                        || clientID.equals(msg.orderDetail.clientID))
+                {
+                    subscriber.processMessage(msg);
+                }
+            }
+        });
+    }
+
+    public void onCancelEvent(CancelResponse msg)
+    {
+        executor.execute(() -> {
+            for (ExchangeEventSubscriber subscriber : orderEventSubscriberList)
+            {
+                String clientID = subscriber.getClientID();
+
+                if (StringUtil.isDefined(clientID) == false //
+                        || clientID.equals(msg.orderDetail.clientID))
                 {
                     subscriber.processMessage(msg);
                 }
@@ -216,7 +265,7 @@ public class ExchangeSimulatorService
                 String clientID = subscriber.getClientID();
 
                 if (StringUtil.isDefined(clientID) == false //
-                        || clientID.equals(msg.clientID))
+                        || clientID.equals(msg.orderDetail.clientID))
                 {
                     subscriber.processMessage(msg);
                 }
@@ -289,27 +338,20 @@ public class ExchangeSimulatorService
 
             if (StringUtil.isDefined(exchangeID) && StringUtil.isDefined(instrumentID))
             {
-                Exchange exchange = getExchangeByID(exchangeID);
-
-                if (exchange != null)
+                ExchangeOrderBook orderBook = exchange.getOrderBookByInstrument(instrumentID, exchangeID);
+                if (orderBook != null)
                 {
-                    ExchangeOrderBook orderBook = exchange.getOrderBookByInstrument(instrumentID);
-                    if (orderBook != null)
-                    {
-                        TopOfBookEvent ev = orderBook.getTopOfBookEventSnapshot();
-                        if (ev != null)
-                            subscriber.processMessage(ev);
-                    }
+                    TopOfBookEvent ev = orderBook.getTopOfBookEventSnapshot();
+                    if (ev != null)
+                        subscriber.processMessage(ev);
                 }
-
             }
             else if (StringUtil.isDefined(exchangeID))
             {
-                Exchange exchange = getExchangeByID(exchangeID);
-                if (exchange != null)
+                ArrayList<ExchangeOrderBook> orderBookList = exchange.getAllOrderBooks();
+                for (ExchangeOrderBook orderBook : orderBookList)
                 {
-                    ArrayList<ExchangeOrderBook> orderBookList = exchange.getAllOrderBooks();
-                    for (ExchangeOrderBook orderBook : orderBookList)
+                    if (exchangeID.equals(orderBook.getExchangeID()))
                     {
                         TopOfBookEvent ev = orderBook.getTopOfBookEventSnapshot();
                         if (ev != null)
@@ -320,15 +362,13 @@ public class ExchangeSimulatorService
             else
             {
                 //
-                for (Exchange exchange : exchangeList)
+
+                ArrayList<ExchangeOrderBook> orderBookList = exchange.getAllOrderBooks();
+                for (ExchangeOrderBook orderBook : orderBookList)
                 {
-                    ArrayList<ExchangeOrderBook> orderBookList = exchange.getAllOrderBooks();
-                    for (ExchangeOrderBook orderBook : orderBookList)
-                    {
-                        TopOfBookEvent ev = orderBook.getTopOfBookEventSnapshot();
-                        if (ev != null)
-                            subscriber.processMessage(ev);
-                    }
+                    TopOfBookEvent ev = orderBook.getTopOfBookEventSnapshot();
+                    if (ev != null)
+                        subscriber.processMessage(ev);
                 }
 
             }
@@ -354,28 +394,22 @@ public class ExchangeSimulatorService
 
             if (StringUtil.isDefined(exchangeID) && StringUtil.isDefined(instrumentID))
             {
-                Exchange exchange = getExchangeByID(exchangeID);
-
-                if (exchange != null)
+                ExchangeOrderBook orderBook = exchange.getOrderBookByInstrument(instrumentID, exchangeID);
+                if (orderBook != null)
                 {
-                    ExchangeOrderBook orderBook = exchange.getOrderBookByInstrument(instrumentID);
-                    if (orderBook != null)
-                    {
-                        OrderBookEvent ev = orderBook.getOrderBookEventSnapshot();
+                    OrderBookEvent ev = orderBook.getOrderBookEventSnapshot();
 
-                        if (ev != null)
-                            subscriber.processMessage(ev.trimToLevel(subscriber.getLevels()));
-                    }
+                    if (ev != null)
+                        subscriber.processMessage(ev.trimToLevel(subscriber.getLevels()));
                 }
 
             }
             else if (StringUtil.isDefined(exchangeID))
             {
-                Exchange exchange = getExchangeByID(exchangeID);
-                if (exchange != null)
+                ArrayList<ExchangeOrderBook> orderBookList = exchange.getAllOrderBooks();
+                for (ExchangeOrderBook orderBook : orderBookList)
                 {
-                    ArrayList<ExchangeOrderBook> orderBookList = exchange.getAllOrderBooks();
-                    for (ExchangeOrderBook orderBook : orderBookList)
+                    if (exchangeID.equals(orderBook.getExchangeID()))
                     {
                         OrderBookEvent ev = orderBook.getOrderBookEventSnapshot();
 
@@ -387,18 +421,14 @@ public class ExchangeSimulatorService
             else
             {
                 //
-                for (Exchange exchange : exchangeList)
+                ArrayList<ExchangeOrderBook> orderBookList = exchange.getAllOrderBooks();
+                for (ExchangeOrderBook orderBook : orderBookList)
                 {
-                    ArrayList<ExchangeOrderBook> orderBookList = exchange.getAllOrderBooks();
-                    for (ExchangeOrderBook orderBook : orderBookList)
-                    {
-                        OrderBookEvent ev = orderBook.getOrderBookEventSnapshot();
+                    OrderBookEvent ev = orderBook.getOrderBookEventSnapshot();
 
-                        if (ev != null)
-                            subscriber.processMessage(ev.trimToLevel(subscriber.getLevels()));
-                    }
+                    if (ev != null)
+                        subscriber.processMessage(ev.trimToLevel(subscriber.getLevels()));
                 }
-
             }
         });
     }

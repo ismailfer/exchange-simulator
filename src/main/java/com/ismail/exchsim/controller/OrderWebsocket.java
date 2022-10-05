@@ -11,8 +11,10 @@ import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.ismail.exchsim.model.CancelRequest;
 import com.ismail.exchsim.model.MessageType;
 import com.ismail.exchsim.model.NewOrderRequest;
+import com.ismail.exchsim.model.OrderStatusRequest;
 import com.ismail.exchsim.model.PingRequest;
 import com.ismail.exchsim.model.PongResponse;
 import com.ismail.exchsim.model.RequestMessage;
@@ -48,6 +50,10 @@ public class OrderWebsocket extends WebSocketAdapter
 
     private ObjectReader jsonNewOrderRequestReader = null;
 
+    private ObjectReader jsonOrderStatusRequestReader = null;
+
+    private ObjectReader jsonCancelRequestReader = null;
+
     private ObjectReader jsonPingRequestReader = null;
 
     private String clientID = null;
@@ -61,6 +67,8 @@ public class OrderWebsocket extends WebSocketAdapter
         mapper = new ObjectMapper();
         jsonRequestReader = mapper.readerFor(RequestMessage.class);
         jsonNewOrderRequestReader = mapper.readerFor(NewOrderRequest.class);
+        jsonOrderStatusRequestReader= mapper.readerFor(OrderStatusRequest.class);
+        jsonCancelRequestReader= mapper.readerFor(CancelRequest.class);
         jsonPingRequestReader = mapper.readerFor(PingRequest.class);
     }
 
@@ -122,8 +130,23 @@ public class OrderWebsocket extends WebSocketAdapter
             {
                 NewOrderRequest orderReq = jsonNewOrderRequestReader.readValue(message);
 
-                exchSimService.submitNewOrder(orderReq);
+                exchSimService.processNewOrder(orderReq);
             }
+            else if (MessageType.CancelRequest.equals(req.messageType))
+            {
+                CancelRequest cancelReq = jsonCancelRequestReader.readValue(message);
+
+                exchSimService.processCancelRequest(cancelReq);
+            }
+            else if (MessageType.OrderStatusRequest.equals(req.messageType))
+            {
+                OrderStatusRequest statusRequest = jsonOrderStatusRequestReader.readValue(message);
+
+                // TODO
+                
+                //exchSimService.processOrderStatusRequest(statusRequest);
+            }
+
             else
             {
                 ResponseMessage msg = new ResponseMessage(MessageType.Error, "Invalid MessageType: " + req.getMessageType());

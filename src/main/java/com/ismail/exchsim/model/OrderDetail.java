@@ -16,7 +16,7 @@ import lombok.ToString;
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class OrderEvent extends ResponseMessage
+public class OrderDetail
 {  
     public String instrumentID;
 
@@ -51,35 +51,31 @@ public class OrderEvent extends ResponseMessage
     
     public String notes;
     
-    public OrderEvent()
+    public OrderDetail()
     {
-        super(MessageType.OrderEvent, true);
+       
     }
     
-    
-    
-    public OrderEvent(NewOrderRequest order)
+    public OrderDetail(NewOrderRequest order)
     {
-        super(MessageType.OrderEvent, true);
-        
         instrumentID = order.instrumentID;
         exchangeID = order.exchangeID;
-        
+
         clientID = order.clientID;
         clientOrderID = order.clientOrderID;
-        
+
         orderType = order.orderType;
         side = order.side;
         price = order.price;
         quantity = order.quantity;
-        
-        status = OrderStatus.PendingNew;
-        
+
+        status = OrderState.PendingNew;
+
     }
     
-    public OrderEvent(Order order)
+    
+    public OrderDetail(Order order)
     {
-        super(MessageType.OrderEvent, true);
         
         instrumentID = order.instrumentID;
         exchangeID = order.exchangeID;
