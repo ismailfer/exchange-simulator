@@ -1,0 +1,202 @@
+
+
+html, body 
+{
+    height: 100%;
+}
+
+a 
+{
+    text-decoration: none;
+}
+
+table 
+{
+  border: 0;
+  font-size: 12px;
+  cursor: default;
+  font-family: Arial,Helvetica, sans-serif;
+}
+
+TH 
+{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+TH a 
+{
+    text-decoration: none;
+}
+
+TD 
+{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    color: white;
+}
+
+TD a 
+{
+    text-decoration: none;
+}
+
+BODY 
+{
+    margin: 0px;
+    font-family: Arial, Sans-Serif, sans-serif;
+}
+
+BLOCKQUOTE 
+{
+    font-size: 12px;
+    font-family: Arial, Sans-Serif, sans-serif;
+	border-left: 2px solid #3c78b5;
+	margin-left: 0;
+	padding-left: 1em;
+}
+
+.small 
+{
+    font-size: 9px;
+}
+
+.smallfooter 
+{
+    font-size: 9px;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+B 
+{
+    font-weight: bold;
+}
+
+H1 
+{
+    font-weight: bold;
+    font-size: 24px;
+    font-family: Arial, Sans-Serif;
+    margin-bottom: 0px;
+}
+
+H2 
+{
+    font-weight: bold;
+    font-size: 18px;
+    font-family: Arial, Sans-Serif;
+    margin-top: 10px;
+    margin-bottom: 0px;
+}
+
+H3 
+{
+    font-weight: bold;
+    font-size: 16px;
+    font-family: Arial, Sans-Serif;
+    margin-top: 10px;
+    margin-bottom: 0px;
+}
+
+H4 
+{
+    font-weight: bold;
+    font-size: 12px;
+    font-family: Arial, Sans-Serif;
+    margin-top: 10px;
+    margin-bottom: 0px;
+}
+
+H5 
+{
+    font-weight: bold;
+    font-size: 11px;
+    font-family: Arial, Sans-serif;
+    margin-bottom: 0px;
+}
+
+H6 
+{
+    font-weight: bold;
+    font-size: 10px;
+    font-family: Arial, Sans-Serif;
+    margin-bottom: 0px;
+}
+
+
+a.backToTop
+{
+	font-size: 10px;
+	text-decoration: none;
+	display: block;
+	float: right;
+    background-repeat: no-repeat;
+    background-position: 0px 3px;
+	padding: 5px 0px 0px 18px;
+	margin: 0px;
+
+}
+
+a.backToTop:hover
+{
+	text-decoration: underline;
+}
+
+
+
+img 
+{
+    border: 0px;
+}
+
+table.blank 
+{
+    margin: 0px;
+    padding: 0px;
+    border: none !important;
+    vertical-align: top;
+    border-collapse: collapse;
+    border-spacing: 0px;
+}
+
+table.blank td, table.blank th
+{
+    margin: 0;
+    padding: 0px 5px 5px 5px;
+    border: none !important;
+    vertical-align: top;
+}
+
+table.noPadding, table.noPadding tr, .noPadding 
+{
+    margin: 0px;
+    padding: 0px !important;
+    border: none;
+    vertical-align: top;
+    border-collapse: collapse;
+    border-spacing: 0px;
+}
+
+table.minColumns td, table.minColumns th 
+{
+    width: 1%;
+}
+
+td.normal, th.normal 
+{
+    width: auto !important;
+}
+
+.nowrap 
+{
+    white-space: nowrap;
+}
+
+
+div.hr
+{
+  height: 15px;
+  padding: 10px 0px;
+}
+
+
