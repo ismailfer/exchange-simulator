@@ -32,6 +32,9 @@ Note: This is a work in progress
   - Matching will occur on this order book
   - This is useful to test a trading strategy on a real market data environment
 
+- Persistence of orders
+- FIX protocol support
+
 ## Architecture
 - Spring Boot framework 
 - Rest API
