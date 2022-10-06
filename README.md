@@ -41,24 +41,54 @@ Note: This is a work in progress
 
 ## RestAPI and Websockets API - Postman Collections
 
+URL for Order Placement Rest API:
+[http://localhost:9080/api/v1/order](http://localhost:9080/api/v1/order)
+
+URL for Order Cancellation Rest API:
+[http://localhost:9080/api/v1/cancelOrder](http://localhost:9080/api/v1/cancelOrder)
+
+URL for Order Stream Websocket:
+[ws://localhost:9081/api/v1/order](ws://localhost:9081/api/v1/order)
+
+URL for Top Of Book Stream Websocket:
+[ws://localhost:9081/api/v1/tob](ws://localhost:9081/api/v1/tob)
+
+URL for Order Book Websocket:
+[ws://localhost:9081/api/v1/orderBook](ws://localhost:9081/api/v1/orderBook)
+
+
+
 Test cases of RestAPIs and Websocket APIs are found in the following Postman collection
 
 [Postman - Exchange Simulator Workspace](https://www.postman.com/restless-satellite-277762/workspace/exchange-simulator-workspace)
 
+#### Building the project
+
+The build process will produce a war file (instead of a jar file); because there is an embedded jetty server; and JSP pages within the project.
+
+To build the project; run the command:
+
+```text
+mvn clean package
+```
 
 #### Running the Application
 
 To run the application from the war file:
 
 ```text
-java -jar target\exchange-simulator-springboot-1.0.war
+java -jar target\exchange-simulator-1.0.war
 ```
 
 To run the application with ZeroG garbage collector
 
 ```text
-java -XX:+UseZGC -Xmx2g -jar target\exchange-simulator-springboot-1.0.war
+java -XX:+UseZGC -Xmx2g -jar target\exchange-simulator-1.0.war
 ```
+
+The app doesn't require much memory; unless you want to load it with thousands of orders
+
+
 
 ## Deployments
 - Docker
@@ -68,7 +98,7 @@ java -XX:+UseZGC -Xmx2g -jar target\exchange-simulator-springboot-1.0.war
 
 This application is dockerized with Dockerfile
 
-Latest docker image is available at my dockerhub; built with jdk17, running on port 9080
+Latest docker image is available at my dockerhub; built with jdk17, running on port 9080 and 9081
 
 [hub.docker.com/r/ismailfer/exchange-simulator](https://hub.docker.com/r/ismailfer/exchange-simulator)
 
