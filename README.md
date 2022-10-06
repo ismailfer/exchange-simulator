@@ -1,4 +1,5 @@
 # Exchange Simulator - Spring Boot, RestAPI, Websockets Stream
+[github.com/ismailfer/exchange-simulator](https://github.com/ismailfer/exchange-simulator)
 
 This is a simulated exchange that accepts market and limit order types.
 
@@ -9,7 +10,6 @@ RestAPI is used to submit order requests, get order status, get static data, and
 Market data is also fed via websockets
 
 
-[github.com/ismailfer/exchange-simulator](https://github.com/ismailfer/exchange-simulator)
 
 ### Objectives
 - Used for testing purposes of algorithmic trading systems
