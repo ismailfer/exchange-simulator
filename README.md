@@ -44,10 +44,10 @@ Note: This is a work in progress
 ### API URLs
 
 URL for Order Placement Rest API:
-[http://localhost:9080/api/v1/order](http://localhost:9080/api/v1/order)
+- [http://localhost:9080/api/v1/order](http://localhost:9080/api/v1/order)
 
 URL for Order Cancellation Rest API:
-[http://localhost:9080/api/v1/cancelOrder](http://localhost:9080/api/v1/cancelOrder)
+- [http://localhost:9080/api/v1/cancelOrder](http://localhost:9080/api/v1/cancelOrder)
 
 URL for Order Stream Websocket:
 - [ws://localhost:9081/api/v1/order](ws://localhost:9081/api/v1/order)
@@ -65,7 +65,7 @@ Test cases of RestAPIs and Websocket APIs are found in the following Postman col
 
 [Postman - Exchange Simulator Workspace](https://www.postman.com/restless-satellite-277762/workspace/exchange-simulator-workspace)
 
-#### Building the project
+## Building the project
 
 The build process will produce a war file (instead of a jar file); because there is an embedded jetty server; and JSP pages within the project.
 
@@ -75,7 +75,7 @@ To build the project; run the command:
 mvn clean package
 ```
 
-#### Running the Application
+## Running the Application
 
 To run the application from the war file:
 
