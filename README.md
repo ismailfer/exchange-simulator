@@ -105,8 +105,14 @@ Latest docker image is available at my dockerhub; built on Alpine linux distribu
 
 - [hub.docker.com/r/ismailfer/exchange-simulator](https://hub.docker.com/r/ismailfer/exchange-simulator)
 
+To pull docker iamge from docker hub:
 
-To build a docker image:
+```text
+docker pull ismailfer/exchange-simulator
+```
+
+
+To build a fresh docker image:
 
 ```text
 docker build --tag exchange-simulator:1.0 .
