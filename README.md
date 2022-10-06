@@ -63,7 +63,7 @@ URL for Order Book Websocket:
 
 Test cases of RestAPIs and Websocket APIs are found in the following Postman collection
 
-[Postman - Exchange Simulator Workspace](https://www.postman.com/restless-satellite-277762/workspace/exchange-simulator-workspace)
+- [Postman - Exchange Simulator Workspace](https://www.postman.com/restless-satellite-277762/workspace/exchange-simulator-workspace)
 
 ## Building the project
 
@@ -101,9 +101,9 @@ The app doesn't require much memory; unless you want to load it with thousands o
 
 This application is dockerized with Dockerfile
 
-Latest docker image is available at my dockerhub; built with jdk17, running on port 9080 and 9081
+Latest docker image is available at my dockerhub; built on Alpine linux distribution; and open jdk17, running on port 9080 and 9081
 
-[hub.docker.com/r/ismailfer/exchange-simulator](https://hub.docker.com/r/ismailfer/exchange-simulator)
+- [hub.docker.com/r/ismailfer/exchange-simulator](https://hub.docker.com/r/ismailfer/exchange-simulator)
 
 
 To build a docker image:
