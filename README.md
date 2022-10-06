@@ -26,6 +26,11 @@ Note: This is a work in progress
 - Any instrument is supported
 - Order book can be cleared via a command in RestAPI or websocket
 
+## Potential Improvements
+- Simulate a real exchange by subscribing to market data from a production environment (i.e. Binance)
+  - Order book will be built based on the market data events
+  - Matching will occur on this order book
+  - This is useful to test a trading strategy on a real market data environment
 
 ## Architecture
 - Spring Boot framework 
