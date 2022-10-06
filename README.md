@@ -8,7 +8,6 @@ RestAPI is used to submit order requests, get order status, get static data, and
 
 Market data is also fed via websockets
 
-Note: This is a work in progress
 
 [github.com/ismailfer/exchange-simulator](https://github.com/ismailfer/exchange-simulator)
 
