@@ -28,15 +28,16 @@ Note: This is a work in progress
 
 
 ## Architecture
-- Spring Boot framework for the execution client webpage
+- Spring Boot framework 
 - Rest API
 - Native WebSockets, using Jetty Server embedded in the spring boot app
 - JSP/web3 to show market data, and orders in the simulator
-- Uses Jackson RestAPI client
+- Jackson json marshalling/unmarshalling
 - Reactive programming architecture
 - Concurrent / Multi-threading environment
-- Zero Garbage Collection environment
+- Zero Garbage Collection
 - Java 17. However the code base can also run in Java 11 and above
+- Maven build
 
 ## RestAPI and Websockets API - Postman Collections
 
