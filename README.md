@@ -1,4 +1,4 @@
-# Exchange Simulator - Spring Boot, RestAPI, Websockets Feeds
+# Exchange Simulator - Spring Boot, RestAPI, Websockets Stream
 
 This is a simulated exchange that accepts market and limit order types.
 
