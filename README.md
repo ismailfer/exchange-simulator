@@ -41,6 +41,8 @@ Note: This is a work in progress
 
 ## RestAPI and Websockets API - Postman Collections
 
+### API URLs
+
 URL for Order Placement Rest API:
 [http://localhost:9080/api/v1/order](http://localhost:9080/api/v1/order)
 
@@ -48,15 +50,16 @@ URL for Order Cancellation Rest API:
 [http://localhost:9080/api/v1/cancelOrder](http://localhost:9080/api/v1/cancelOrder)
 
 URL for Order Stream Websocket:
-[ws://localhost:9081/api/v1/order](ws://localhost:9081/api/v1/order)
+- [ws://localhost:9081/api/v1/order](ws://localhost:9081/api/v1/order)
 
 URL for Top Of Book Stream Websocket:
-[ws://localhost:9081/api/v1/tob](ws://localhost:9081/api/v1/tob)
+- [ws://localhost:9081/api/v1/tob](ws://localhost:9081/api/v1/tob)
 
 URL for Order Book Websocket:
-[ws://localhost:9081/api/v1/orderBook](ws://localhost:9081/api/v1/orderBook)
+- [ws://localhost:9081/api/v1/orderBook](ws://localhost:9081/api/v1/orderBook)
 
 
+### API Test Cases
 
 Test cases of RestAPIs and Websocket APIs are found in the following Postman collection
 
