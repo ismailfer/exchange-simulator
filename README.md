@@ -2,7 +2,9 @@
 
 This is a simulated exchange that accepts market and limit order types.
 
-Users can submit orders using a Websocket feed; and receive order and trade events via Websockets too
+RestAPI is used to submit order requests, get order status, get static data, and market data.
+
+ًWebsocket stream is used to submit order requests,  receive order and trade events. This is usually much faster than using a RestAPI
 
 Market data is also fed via websockets
 
